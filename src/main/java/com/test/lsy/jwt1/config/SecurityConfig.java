@@ -2,6 +2,7 @@ package com.test.lsy.jwt1.config;
 
 import com.test.lsy.jwt1.filter.MyFilter1;
 import com.test.lsy.jwt1.filter.MyFilter3;
+import com.test.lsy.jwt1.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +36,8 @@ public class SecurityConfig {
                 .addFilter(corsFilter)          // @CrosOrign 사용은 인증이 없을 때, 인증이 있을 때는 필터에 등록을 해야 함
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
+                // 필터 동작하도록 등록
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/user/**")
                                 .hasAnyRole("USER", "MANAGER", "ADMIN")
