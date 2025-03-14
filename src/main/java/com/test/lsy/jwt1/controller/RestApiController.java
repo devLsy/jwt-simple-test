@@ -4,7 +4,6 @@ import com.test.lsy.jwt1.model.User;
 import com.test.lsy.jwt1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,4 +36,20 @@ public class RestApiController {
         repository.save(user);
         return "회원가입 완료!";
     }
+
+    @GetMapping("/api/v1/user")
+    public String user() {
+        return "user";
+    }
+
+    @GetMapping("/api/v1/manager")
+    public String manager() {
+        return "manager";
+    }
+
+    @GetMapping("/api/v1/admin")
+    public String admin() {
+        return "admin";
+    }
+
 }

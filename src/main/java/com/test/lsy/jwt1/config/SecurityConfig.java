@@ -1,6 +1,8 @@
 package com.test.lsy.jwt1.config;
 
 import com.test.lsy.jwt1.jwt.JwtAuthenticationFilter;
+import com.test.lsy.jwt1.jwt.JwtAuthorizationFilter;
+import com.test.lsy.jwt1.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +22,10 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
-    
+
     private final CorsFilter corsFilter;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final UserRepository userRepository;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -42,6 +45,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 // 필터 동작하도록 등록
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/v1/user/**")
                                 .hasAnyRole("USER", "MANAGER", "ADMIN")
