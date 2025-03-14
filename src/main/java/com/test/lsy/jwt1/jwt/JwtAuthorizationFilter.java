@@ -35,21 +35,21 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     
     // 인증이나 권한이 필요한 주소요청이 있을 때 이 필터를 타게 됨
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-//        super.doFilterInternal(request, response, chain);
-        log.info("인증이나 권한이 필요한 주소가 요청되었음~~");
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws IOException, ServletException {
 
-        String jwtHeader = request.getHeader("Authorization");
+        String jwtHeader = request.getHeader(JwtProperties.HEADER_STRING);
         log.info("jwtHeader :: {}", jwtHeader);
 
         // header가 없거나 Bearer로 시작하지 않으면 필터 태우고 return
-        if(jwtHeader == null || !jwtHeader.startsWith("Bearer")) {
+        if(jwtHeader == null || !jwtHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             chain.doFilter(request, response);
             return;
         }
 
         // JWT 토큰을 검증해서 정상적인 사용자인지 확인
-        String jwtToken = request.getHeader("Authorization").replace("Bearer ", "");
+        String jwtToken = request.getHeader(JwtProperties.HEADER_STRING).replace("Bearer ", "");
 
         log.info("parsed jwtToken :: {}", jwtToken);
 
@@ -69,7 +69,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
             // 시큐리티 세션에 접근하여 Authentication 객체를 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
 //            chain.doFilter(request, response);
         }
         chain.doFilter(request, response);
