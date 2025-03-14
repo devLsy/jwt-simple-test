@@ -1,8 +1,12 @@
 package com.test.lsy.jwt1.jwt;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.lsy.jwt1.auth.PrincipalDetails;
 import com.test.lsy.jwt1.model.User;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Date;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -56,11 +61,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             
             // authentication에 담긴 값 출력
-            // 값이 있으면 authentication 객체가 session영역에 저장됨 ==> 로그인이 되었다는 의미
+            // authentication값이 있으면 세션에 저장되었고 즉, 로그인이 되었다는 의미
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
             log.info("로그인 성공~~~");
             log.info(principalDetails.getUser().getUsername());
             log.info("=================================================");
+            // 리턴의 이유는 시큐리티가 권한처리를 해주기 때문에 편하라고 한 것임
             return authentication;
 
         } catch (IOException e) {
@@ -68,5 +74,30 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         }
 
         return null;
+    }
+
+    // attemptAuthentication() 실행 후 인증이 정상적으로 되면 실행되는 함수
+    // 여기서 JWT 토큰 생성 후 request한 사용자에게 response해주면 됨
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+
+        log.info("진짜 인증되었다면 찍힐 것임~~~~");
+        PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
+            
+        // JWT 토큰 생성(Hash암호방식)
+        String jwtToken = JWT.create()
+                .withSubject(principalDetails.getUsername())
+                // 만료시간
+                .withExpiresAt(new Date(System.currentTimeMillis()+(60000*10)))
+                // 내가 넣고 싶은 클레임값
+                .withClaim("id", principalDetails.getUser().getId())
+                .withClaim("username", principalDetails.getUser().getUsername())
+                // 암호화 키
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+        // 응답 헤더에 토큰 추가
+        response.addHeader("Authorization", "Bearer "+jwtToken);
     }
 }
