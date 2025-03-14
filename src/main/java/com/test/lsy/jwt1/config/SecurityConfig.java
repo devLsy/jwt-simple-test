@@ -1,6 +1,5 @@
 package com.test.lsy.jwt1.config;
 
-import com.test.lsy.jwt1.filter.MyFilter3;
 import com.test.lsy.jwt1.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +10,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
@@ -20,7 +20,7 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
-
+    
     private final CorsFilter corsFilter;
     private final AuthenticationConfiguration authenticationConfiguration;
 
@@ -32,7 +32,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        http.addFilterBefore(new MyFilter3(), BasicAuthenticationFilter.class);
-        http.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class);
+//        http.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class);
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -52,5 +52,10 @@ public class SecurityConfig {
                                 .anyRequest().permitAll()
                 );
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
