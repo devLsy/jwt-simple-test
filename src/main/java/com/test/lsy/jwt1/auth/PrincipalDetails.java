@@ -1,6 +1,7 @@
 package com.test.lsy.jwt1.auth;
 
 import com.test.lsy.jwt1.model.User;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Data
 public class PrincipalDetails implements UserDetails {
 
     private final User user;
